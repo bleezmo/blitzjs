@@ -1,5 +1,6 @@
 var Blitz = require('blitz');
 var _ = require('underscore');
+var requestBuilder = require('./RequestBuilder');
 
 var email = "joshuarogers10@gmail.com",
     apiKey = "9ff52416-7b5ae544-c8bac39d-dcdea574";
@@ -17,8 +18,11 @@ function getWebsite(path, queryParams){
     }
     return url;
 }
+function loadRequests(callback){
+    requestBuilder.getRequests(host,callback)
+}
 console.log("Running a rush...");
-function rush(){
+function rush(requests){
     var path = "/player.js"
     var params = {
         apiClientId : "502d46ce0364068384f217a6",
@@ -26,11 +30,10 @@ function rush(){
     }
     var path2 = "/player/item/50180807e4b0b89ebc0153b0/administer"
     var params2 = {}
+    //var steps = [{url: getWebsite(path, params), status: 200, timeout:800},{url: getWebsite(path2, params2), status: 200, timeout: 800}];
+    var steps = _.map(requests,function(url){return {url: url, status: 200, timeout:800}})
     blitz.rush({
-        steps: [
-            {url: getWebsite(path, params), status: 200, timeout:800},
-            {url: getWebsite(path2, params2), status: 200, timeout: 800, cookies}
-        ],
+        steps: steps,
         region: 'california',
         pattern: { intervals: [{start: 1, end: 10, duration: 30}]}
     }).on('status', function (data) {
@@ -59,4 +62,4 @@ function rush(){
         console.log("reason: " + response.reason);
     });
 }
-rush();
+loadRequests(rush)
